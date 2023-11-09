@@ -6,15 +6,10 @@
 /*   By: nicgonza <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/10 15:55:54 by nicgonza          #+#    #+#             */
-/*   Updated: 2023/10/10 16:47:22 by nicgonza         ###   ########.fr       */
+/*   Updated: 2023/10/30 14:14:16 by nicgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 #include "get_next_line.h"
-
-#ifndef BUFFER_SIZE
-# define BUFFER_SIZE 1
-#endif
 
 char	*ft_free(char *buffer, char *buf)
 {
@@ -40,6 +35,8 @@ char	*ft_next(char *buffer)
 		return (NULL);
 	}
 	line = ft_calloc((ft_strlen(buffer) - i + 1), sizeof(char));
+	if (!line)
+		return (NULL);
 	i++;
 	j = 0;
 	while (buffer[i])
@@ -59,6 +56,8 @@ char	*ft_line(char *buffer)
 	while (buffer[i] && buffer[i] != '\n')
 		i++;
 	line = ft_calloc(i + 2, sizeof(char));
+	if (!line)
+		return (NULL);
 	i = 0;
 	while (buffer[i] && buffer[i] != '\n')
 	{
@@ -78,12 +77,15 @@ char	*read_file(int fd, char *res)
 	if (!res)
 		res = ft_calloc(1, 1);
 	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	if (!buffer)
+		return (NULL);
 	byte_read = 1;
 	while (byte_read > 0)
 	{
 		byte_read = read(fd, buffer, BUFFER_SIZE);
 		if (byte_read == -1)
 		{
+			free(res);
 			free(buffer);
 			return (NULL);
 		}
@@ -101,11 +103,14 @@ char	*get_next_line(int fd)
 	static char	*buffer;
 	char		*line;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
 	buffer = read_file(fd, buffer);
 	if (!buffer)
+	{
+		free(buffer);
 		return (NULL);
+	}
 	line = ft_line(buffer);
 	buffer = ft_next(buffer);
 	return (line);
